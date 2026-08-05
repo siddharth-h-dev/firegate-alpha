@@ -9,5 +9,6 @@ iface eth0 inet6 auto
 auto eth1
 iface eth1 inet static
 	address 172.16.0.1/30
+	post-up ip route add 172.16.0.0/12 via 172.16.0.2 dev eth1
 iface eth1 inet6 auto
 
