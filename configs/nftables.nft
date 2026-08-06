@@ -18,9 +18,26 @@ table inet firegate_filter {
 	chain forward {
 		type filter hook forward priority filter; policy drop;
 		
-		ip saddr 172.16.0.0/12 oifname "eth0" accept
+		ct state established,related accept
+
+		ct state invalid drop
+
+		# EXAMPLE VLANS CONFIG
+		# VLAN 10 - Infrastructure
+		ip saddr 172.16.10.0/24 oifname "eth0" state new accept
 		
-		iifname "eth0" ip daddr 172.16.0.0/12 ct state established,related accept
+		# VLAN 20 - Personal
+		ip saddr 172.16.20.0/24 oifname "eth0" ct state new accept
+		
+		# VLAN 30 - Guest (Internet access can be restricted if needed)
+		ip saddr 172.16.30.0/24 oifname "eth0" ct state new accept
+		
+		# VLAN 40 - Anonymous (VPN/Tor Routing yet to be implemented)
+		ip saddr 172.16.40.0/24 oifname "eth0" ct state new accept
+
+		# Config for no VLANs
+		# ip saddr 172.16.0.0/12 oifname "eth0" accept
+		# iifname "eth0" ip daddr 172.16.0.0/12 ct state established,related accept
 	}
 
 	chain output {
