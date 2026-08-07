@@ -40,7 +40,7 @@ table inet firegate_filter {
 		# VLAN 30 - Guest (Internet access can be restricted if needed)
 		ip saddr 172.16.30.0/24 oifname "eth0" ct state new accept
 		
-		# VLAN 40 - Anonymous (VPN/Tor Routing yet to be implemented)
+		# VLAN 40 - Anonymous
 		ip saddr 172.16.40.0/24 oifname "eth0" ct state new accept
 
 		# Config for no VLANs
@@ -59,5 +59,17 @@ table ip firegate_nat {
 		type nat hook postrouting priority srcnat; policy accept;
 		
 		oifname "eth0" masquerade
+	}
+}
+
+table ip tor_proxy {
+	chain prerouting {
+		type nat hook prerouting priority dstnat; policy accept;
+		
+		# VLAN 40 Tor Routing		
+		ip saddr 172.16.40.0/24 udp dport 53 counter redirect to :5353
+		ip saddr 172.16.40.0/24 tcp dport 53 counter redirect to :5353
+
+		ip saddr 172.16.40.0/24 tcp dport { 21, 22, 80, 443, 8080 } counter redirect to :9040
 	}
 }
