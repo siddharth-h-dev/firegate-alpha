@@ -1,0 +1,28 @@
+# Firegate NFTables Configuration - VLAN 30 (Guest)
+
+define vlan30-net = 172.16.30.0/24
+
+table inet vlan30 {
+	chain input {
+		type filter hook input priority filter + 10; policy drop;
+		
+		# Firewall DNS will not be used for Guests so DNS dropped
+		# No Firewall Access at all
+		
+		ip saddr $vlan30-net drop
+		
+	}
+	
+	chain forward {
+		type filter hook forward priority filter + 10; policy drop;
+		
+		# VLAN Isolation
+		ip saddr $vlan30-net ip daddr $lan-net ip daddr != $vlan30-net drop
+			
+		# Unrestricted Internet Access (Can be restricted to Web and DNS if needed)
+		ip saddr $vlan30-net oifname $wan-iface ct state new accept
+			
+		ip saddr $vlan30-net drop
+		
+	}
+}

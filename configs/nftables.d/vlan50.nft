@@ -1,0 +1,26 @@
+# Firegate NFTables Configuration - VLAN 50 (Isolated Lab)
+
+define vlan50-net = 172.16.50.0/24
+
+table inet vlan50 {
+	chain input {
+		type filter hook input priority filter + 10; policy drop;
+
+		# No Firewall Access needed
+		
+		ip saddr $vlan50-net drop
+		
+	}
+	
+	chain forward {
+		type filter hook forward priority filter + 10; policy drop;
+		
+		# VLAN Isolation
+		ip saddr $vlan50-net ip daddr $lan-net ip daddr != $vlan50-net drop
+			
+		# No Internet Access needed (If needed, may be opened to specific IPs for updates)
+			
+		ip saddr $vlan50-net drop
+		
+	}
+}
