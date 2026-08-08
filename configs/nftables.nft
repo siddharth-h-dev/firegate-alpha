@@ -29,7 +29,7 @@ table inet core {
 
 }
 
-table ip nat {
+table inet nat {
 	chain postrouting {
 		type nat hook postrouting priority srcnat; policy accept;
 		
