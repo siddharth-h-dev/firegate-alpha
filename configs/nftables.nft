@@ -4,21 +4,19 @@
 
 flush ruleset
 
-define lan-net = 172.16.0.0/12
-define wan-iface = "eth0"
-
 table inet core {
 
 	chain input {
 		type filter hook input priority filter; policy drop;
 		
+		iif lo accept
+		
 		ct state established,related accept
 		ct state invalid drop
 		
-		iifname "lo" accept
 		ip protocol icmp accept
 		
-		ip saddr $lan-net continue
+		ip saddr 172.16.0.0/12 continue
 		
 	}
 
@@ -28,7 +26,7 @@ table inet core {
 		ct state established,related accept
 		ct state invalid drop
 		
-		ip saddr $lan-net continue
+		ip saddr 172.16.0.0/12 continue
 	}
 
 	chain output {
@@ -38,18 +36,8 @@ table inet core {
 	chain postrouting {
 		type nat hook postrouting priority srcnat; policy accept;
 		
-		oif $wan-iface masquerade
+		oifname "eth0" masquerade
 	}
 }
 
 include "/etc/nftables.d/*.nft"
-
-# Insurance: Takes care of accidents
-table inet insurance {
-	chain input {
-		type filter hook input priority filter + 20; policy drop;
-	}
-	chain forward {
-		type filter hook forward priority filter + 20; policy drop;
-	}
-}

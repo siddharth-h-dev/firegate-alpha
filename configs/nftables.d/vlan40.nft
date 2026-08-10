@@ -1,13 +1,11 @@
 # Firegate NFTables Configuration - VLAN 40 (Tor-Routed)
 
-define vlan40-net = 172.16.40.0/24
-
 table inet vlan40 {
 	chain input {
-		type filter hook input priority filter + 10; policy drop;
-		
+		type filter hook input priority filter + 10; policy accept;
+			
 		# No Firewall Access needed
-		ip saddr $vlan40-net drop
+		ip saddr 172.16.40.0/24 drop
 		
 	}
 	
@@ -15,21 +13,18 @@ table inet vlan40 {
 		type nat hook prerouting priority dstnat; policy accept;
 		
 		# Tor Routing
-		ip saddr $vlan40-net udp dport 53 redirect to :5353
-		ip saddr $vlan40-net tcp dport 53 redirect to :5353
+		ip saddr 172.16.40.0/24 udp dport 53 redirect to :5353
+		ip saddr 172.16.40.0/24 tcp dport 53 redirect to :5353
 		
-		ip saddr $vlan40-net tcp dport { 21, 22, 80, 443, 8080 } redirect to :9040
+		ip saddr 172.16.40.0/24 tcp dport { 21, 22, 80, 443, 8080 } redirect to :9040
 	}	
 	chain forward {
-		type filter hook forward priority filter + 10; policy drop;
-		
-		# VLAN Isolation
-		ip saddr $vlan40-net ip daddr $lan-net ip daddr != $vlan40-net drop
+		type filter hook forward priority filter + 10; policy accept;
 			
 		# Unrestricted Internet Access
-		ip saddr $vlan40-net oifname $wan-iface ct state new accept
+		ip saddr 172.16.40.0/24 oifname "eth0" ct state new accept
 			
-		ip saddr $vlan40-net drop
+		ip saddr 172.16.40.0/24 drop
 		
 	}
 }

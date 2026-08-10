@@ -1,35 +1,30 @@
 # Firegate NFTables Configuration - VLAN 10
 
-define vlan10-net = 172.16.10.0/24
-
 table inet vlan10 {
 	chain input {
-		type filter hook input priority filter + 10; policy drop;
+		type filter hook input priority filter + 10; policy accept;
 		
 		# Allow DNS
-		ip saddr $vlan10-net udp dport 53 ct state new accept
-		ip saddr $vlan10-net tcp dport 53 ct state new accept
+		ip saddr 172.16.10.0/24 udp dport 53 ct state new accept
+		ip saddr 172.16.10.0/24 tcp dport 53 ct state new accept
 		
 		# Allow Web GUI Access
-		ip saddr $vlan10-net tcp dport 443 ct state new accept
+		ip saddr 172.16.10.0/24 tcp dport 443 ct state new accept
 		
 		# Allow SSH
-		ip saddr $vlan10-net tcp dport 22 accept
+		ip saddr 172.16.10.0/24 tcp dport 22 accept
 		
-		ip saddr $vlan10-net drop
+		ip saddr 172.16.10.0/24 drop
 		
 	}
 	
 	chain forward {
-		type filter hook forward priority filter + 10; policy drop;
+		type filter hook forward priority filter + 10; policy accept;
 		
-		# VLAN Isolation
-		ip saddr $vlan10-net ip daddr $lan-net ip daddr != $vlan10-net drop
-			
 		# Unrestricted Internet Access
-		ip saddr $vlan10-net oifname $wan-iface ct state new accept
+		ip saddr 172.16.10.0/24 oifname "eth0" ct state new accept
 			
-		ip saddr $vlan10-net drop
+		ip saddr 172.16.10.0/24 drop
 		
 	}
 }
