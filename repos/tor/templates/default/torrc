@@ -1,0 +1,13 @@
+RunAsDaemon 1
+
+DataDirectory /var/lib/tor
+
+TransPort 172.16.0.1:9040
+
+DNSPort 172.16.0.1:5353
+
+VirtualAddrNetworkIPv4 10.192.0.0/10
+AutomapHostsOnResolve 1
+
+User tor
+Log notice file /var/log/tor/notices.log

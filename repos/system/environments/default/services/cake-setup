@@ -1,0 +1,45 @@
+#!/sbin/openrc-run
+
+description="Applies Cake SQM Traffic Shaping to WAN - Integrated with Firegate"
+
+WAN_IF="eth0"
+IFB_IF="ifb0"
+
+DOWN_SPEED="25mbit"
+UP_SPEED="25mbit"
+
+depend () {
+	need net
+	after firewall
+}
+
+start () {
+	ebegin "Starting CAKE Traffic Shaping on $WAN_IF"
+
+	# Setup IFB
+	modprobe ifb numifbs=1 >/dev/null 2>&1
+	ip link set dev $IFB_IF up
+	
+	# Redirect Ingress from WAN to IFB
+	tc qdisc add dev $WAN_IF handle ffff: ingress
+	tc filter add dev $WAN_IF parent ffff: protocol all u32 match u32 0 0 action mirred egress redirect dev $IFB_IF
+	
+	# Shape Download on IFB
+	tc qdisc replace dev $IFB_IF root cake bandwidth $DOWN_SPEED besteffort nat wash split-gso
+	
+	# Shape Download on WAN
+	tc qdisc replace dev $WAN_IF root cake bandwidth $UP_SPEED besteffort nat wash split-gso	
+	
+	eend $?
+}
+
+stop () {
+	ebegin "Stopping CAKE Traffic Shaping"
+	
+	tc qdisc del dev $WAN_IF root 2>/dev/null
+	tc qdisc del dev $WAN_IF ingress 2>/dev/null
+	tc qdisc del dev $IFB_IF root 2>/dev/null
+	ip link set dev $IFB_IF down 2>/dev/null
+	
+	eend $?
+}
