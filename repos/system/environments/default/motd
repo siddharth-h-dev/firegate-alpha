@@ -1,4 +1,12 @@
 Welcome to Firegate Alpha!
 This is an Alpine-based Firewall OS built for Homelabbers.
+Visit the official Github page for more info!
+(https://github.com/siddharth-h-dev/firegate-alpha)
 
-Visit the official Github page for more info! (https://github.com/siddharth-h-dev/firegate-alpha)
+The programs included with Firegate Alpha are free software;
+the exact distribution terms for each program are described in
+the individual files in /usr/share/doc/*/copyright and the
+LICENSE file in the root directory.
+
+This system comes with ABSOLUTELY NO WARRANTY, to the extent
+permitted by applicable law.
