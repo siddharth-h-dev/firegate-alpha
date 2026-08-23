@@ -3,6 +3,7 @@ module firegate
 go 1.26.3
 
 require (
+	github.com/alexedwards/scs/v2 v2.9.0
 	github.com/go-chi/chi/v5 v5.3.2
 	github.com/go-git/go-git/v5 v5.19.2
 )

@@ -21,18 +21,28 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 	"firegate/internal/git"
 	"firegate/internal/services"
+	"firegate/internal/auth"
+	"github.com/alexedwards/scs/v2"
+	"time"
 )
 
 type ApplyRequest struct {
 	Message string `json:"message"`
 }
 
+var sm *scs.SessionManager
+
 func main() {
+	
+	sm = scs.New()
+	sm.Lifetime = 24 * time.Hour
+	
 	r := chi.NewRouter()
+	r.Use(sm.LoadAndSave)
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
 	
-	r.Get("/api/{service}/status", func(w http.ResponseWriter, r *http.Request) {
+	r.Get("/api/{service}/git/status", func(w http.ResponseWriter, r *http.Request) {
 		svc := chi.URLParam(r, "service")
 		status, err := git.GetStatus(svc)
 		if err != nil {
@@ -77,6 +87,25 @@ func main() {
 		
 		w.WriteHeader(http.StatusOK)
 		json.NewEncoder(w).Encode(map[string]string{"message": svc + " config applied and commited"})
+	})
+	
+	r.Post("/api/login", func(w http.ResponseWriter, r *http.Request) {
+		var req struct {
+			Username string `json:"username"`
+			Password string `json:"password"`
+		}
+		
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+			http.Error(w, "Invalid JSON Body", 400)
+			return
+		}
+		
+		if err := auth.Verify(req.Username, req.Password); err != nil {
+			http.Error(w, "Unauthorized", 401)
+			return
+		}	
+		sm.Put(r.Context(), "authenticated", true)
+		json.NewEncoder(w).Encode(map[string]bool{"success": true})
 	})
 
 	log.Println("Firegate Backend Listening on :8080")
