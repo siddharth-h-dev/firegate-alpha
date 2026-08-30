@@ -2,7 +2,7 @@
 <div align="center">
   <img width="1280" height="640" alt="Firegate Alpha Cover" src="https://github.com/user-attachments/assets/4ce49599-b9e8-4733-85b9-6ee6860812c6" />
 </div>
-This is an Alpine-based Firewall OS built for Homelabbers that abides by the "Don't Trust Your Firewall" (DTyF) principle.
+This is an Alpine-based Firewall OS built for Homelabbers that abides by the "Don't Trust your Firewall" (DTyF) principle.
 
 [Check out DTyF here!](https://github.com/siddharth-h-dev/dont-trust-your-firewall)
 
