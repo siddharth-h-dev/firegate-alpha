@@ -10,21 +10,21 @@ WARNING: This is only a firewall, it does not have DHCP or other routing feature
 
 ## FEATURES:
 - **Traffic Shaping**: Built-in Traffic Shaping setup with **CAKE** (Common Applications Kept Enhanced) algorithm having *wash* and other features.
-- **IDS/IPS**: Detect (or) Prevent Intrusion with Suricata configued out-of-the-box.
+- **IDS/IPS**: Detect (or) Prevent Intrusion with Suricata configured out-of-the-box.
 - **Tor routing**: Certain VLAN traffic can be routed through Tor for anonymity on the internet.
 - **Unbound with Ad-blocking**: Unbound DNS with a blocklist for ads, trackers, malware and nsfw.
 - **Easy-to-use Web GUI**: Web GUI designed for easy configuration without the need to edit configuration files manually.
 - **GitOps config management**: Configuration is powered by GitOps.
+- **Minimal Setup**: Core features are already setup for you.
+- **Super Lightweight**: Alpine Linux is the base for this OS.
 - **Abides by DTyF**: Firegate Alpha is built such that you can implement the DTyF principle in your network easily.
 
 ## ADVANTAGES:
-- **Standalone Firewall**: As a separate L3 Switch will handle DHCP, Inter-VLAN Routing, etcetra, Firegate will be efficient at its core purpouse.
+- **Standalone Firewall**: A separate L3 Switch will handle DHCP, Inter-VLAN Routing, etc. Firegate Alpha will be efficient at its core purpose.
 - **Homelabber-Centric**: Built with the homelabbers in mind.
-- **Minimal Setup**: Core features are already setup for you.
-- **Secure**: Definetly more secure than a standard home router.
-- **Super Lightweight**: Alpine Linux is the base for this OS.
+- **Secure**: A secure firewall OS in general on top of the DTyF architecture will make your home network very secure.
 - **Easy rollbacks**: You can easily revert the config if it is broken.
-- **Prepared for a compromise**: If you follow the DTyF principle, you network will be prepared for a firewall compromise.
+- **Prepared for a compromise**: If you follow the DTyF principle, your network will be prepared for a firewall compromise. This is ZERO TRUST.
 
 Core features developed. Web GUI still in development.
 
