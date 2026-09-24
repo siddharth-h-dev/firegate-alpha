@@ -13,15 +13,21 @@
 package main
 
 import (
+	
+	// Internal Modules (Coded by me)
+	
+	"firegate/internal/git"
+	"firegate/internal/services"
+	"firegate/internal/auth"
+	
+	// External Modules
+	
 	"log"
 	"net/http"
 	"encoding/json"
 	"fmt"	
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
-	"firegate/internal/git"
-	"firegate/internal/services"
-	"firegate/internal/auth"
 	"github.com/alexedwards/scs/v2"
 	"time"
 )
@@ -41,54 +47,9 @@ func main() {
 	r.Use(sm.LoadAndSave)
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
-	
-	r.Get("/api/{service}/git/status", func(w http.ResponseWriter, r *http.Request) {
-		svc := chi.URLParam(r, "service")
-		status, err := git.GetStatus(svc)
-		if err != nil {
-			http.Error(w, err.Error(), 500)
-			return
-		}
-		if status == "" {
-			status = "working tree clean"
-		}
-		json.NewEncoder(w).Encode(map[string]string{"status": status})
-	})
 
-	r.Post("/api/{service}/apply", func(w http.ResponseWriter, r *http.Request) {
-		svc := chi.URLParam(r, "service")
-		
-		var req ApplyRequest
-		if err := json.NewDecoder(r.Body).Decode(&req); err !=nil {
-			http.Error(w, "Invalid JSON Body", 400)
-			return
-		}
-		
-		if req.Message == "" {
-			req.Message = fmt.Sprintf("Updated %s config in UI", svc)
-		}
-		
-		var serviceType services.ServiceType
-		switch svc {
-			case  "nftables": serviceType = services.ServiceNftables
-			case  "unbound": serviceType = services.ServiceUnbound
-			case  "suricata": serviceType = services.ServiceSuricata
-			case  "tor": serviceType = services.ServiceTor
-			case "motd": serviceType = services.ServiceMOTD
-			default:
-				http.Error(w, "Unknown Service", 400)
-				return
-		}
-		
-		if  err := services.ApplyConfig(serviceType, req.Message); err != nil {
-			http.Error(w, err.Error(), 500)
-			return
-		}
-		
-		w.WriteHeader(http.StatusOK)
-		json.NewEncoder(w).Encode(map[string]string{"message": svc + " config applied and commited"})
-	})
-	
+	// Login
+
 	r.Post("/api/login", func(w http.ResponseWriter, r *http.Request) {
 		var req struct {
 			Username string `json:"username"`
@@ -105,9 +66,87 @@ func main() {
 			return
 		}	
 		sm.Put(r.Context(), "authenticated", true)
+		
+		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(map[string]bool{"success": true})
 	})
-
+	
+	r.Group(func(r chi.Router) {
+		
+		r.Use(authMiddleware)
+		
+		// Get Git repo Tree status
+		
+		r.Get("/api/{service}/git/status", func(w http.ResponseWriter, r *http.Request) {
+			svc := chi.URLParam(r, "service")
+			status, err := git.GetStatus(svc)
+			if err != nil {
+				http.Error(w, err.Error(), 500)
+				return
+			}
+			if status == "" {
+				status = "working tree clean"
+			}
+			json.NewEncoder(w).Encode(map[string]string{"status": status})
+		})
+		
+		// Apply changes
+		
+		r.Post("/api/{service}/apply", func(w http.ResponseWriter, r *http.Request) {
+			svc := chi.URLParam(r, "service")
+			
+			var req ApplyRequest
+			if err := json.NewDecoder(r.Body).Decode(&req); err !=nil {
+				http.Error(w, "Invalid JSON Body", 400)
+				return
+			}
+			
+			if req.Message == "" {
+				req.Message = fmt.Sprintf("Updated %s config in UI", svc)
+			}
+			
+			var serviceType services.ServiceType
+			switch svc {
+				case  "nftables": serviceType = services.ServiceNftables
+				case  "unbound": serviceType = services.ServiceUnbound
+				case  "suricata": serviceType = services.ServiceSuricata
+				case  "tor": serviceType = services.ServiceTor
+				case "motd": serviceType = services.ServiceMOTD
+				default:
+					http.Error(w, "Unknown Service", 400)
+					return
+			}
+			
+			if  err := services.ApplyConfig(serviceType, req.Message); err != nil {
+				http.Error(w, err.Error(), 500)
+				return
+			}
+			
+			w.WriteHeader(http.StatusOK)
+			json.NewEncoder(w).Encode(map[string]string{"message": svc + " config applied and commited"})
+		})
+	
+	})
+	
 	log.Println("Firegate Backend Listening on :8080")
 	log.Fatal(http.ListenAndServe(":8080", r))
+}
+
+// Middleware
+
+func authMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		
+		// Check for Authentication
+		isAuthenticated := sm.GetBool(r.Context(), "authenticated")
+		
+		if !isAuthenticated {
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusUnauthorized)
+			json.NewEncoder(w).Encode(map[string]string{"error": "Access Denied. Authentication required."})
+			return
+		}
+		
+		next.ServeHTTP(w, r)		
+	})	
 }
