@@ -77,9 +77,9 @@ func main() {
 		
 		// Get Git repo Tree status
 		
-		r.Get("/api/{service}/git/status", func(w http.ResponseWriter, r *http.Request) {
-			svc := chi.URLParam(r, "service")
-			status, err := git.GetStatus(svc)
+		r.Get("/api/git/{repo}/status", func(w http.ResponseWriter, r *http.Request) {
+			repo := chi.URLParam(r, "repo")
+			status, err := git.GetStatus(repo)
 			if err != nil {
 				http.Error(w, err.Error(), 500)
 				return
@@ -90,9 +90,34 @@ func main() {
 			json.NewEncoder(w).Encode(map[string]string{"status": status})
 		})
 		
+		// Restart a Service
+		
+		r.Get("/api/service/{service}/restart", func(w http.ResponseWriter, r *http.Request) {
+			svc := chi.URLParam(r, "service")
+			
+			var serviceType services.ServiceType
+			switch svc {
+				case  "nftables": serviceType = services.ServiceNftables
+				case  "unbound": serviceType = services.ServiceUnbound
+				case  "suricata": serviceType = services.ServiceSuricata
+				case  "tor": serviceType = services.ServiceTor
+				case "motd": serviceType = services.ServiceMOTD
+				default:
+					http.Error(w, "Unknown Service", 400)
+					return
+			}
+			
+			if  err := services.Restart(serviceType); err != nil {
+				http.Error(w, err.Error(), 500)
+				return
+			}
+			
+			w.WriteHeader(http.StatusOK)
+			json.NewEncoder(w).Encode(map[string]string{"message": svc + " restarted with no errors"})
+		})		
 		// Apply changes
 		
-		r.Post("/api/{service}/apply", func(w http.ResponseWriter, r *http.Request) {
+		r.Post("/api/service/{service}/apply", func(w http.ResponseWriter, r *http.Request) {
 			svc := chi.URLParam(r, "service")
 			
 			var req ApplyRequest

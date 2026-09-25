@@ -98,4 +98,12 @@ func apply(s ServiceType, path string) error {
 		}
 	}
 	return nil
-}	
+}
+
+func Restart(s ServiceType) error {
+	cmd := exec.Command("doas", "/sbin/rc-service", getConfigFilename(s), "restart")
+	if out, err := cmd.CombinedOutput(); err != nil {
+		return fmt.Errorf("%s", string(out))
+	}
+	return nil
+}
