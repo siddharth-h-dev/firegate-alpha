@@ -1,2 +1,165 @@
-<h1>Welcome to SvelteKit</h1>
-<p>Visit <a href="https://svelte.dev/docs/kit">svelte.dev/docs/kit</a> to read the documentation</p>
+<script lang="ts">
+	let username = '';
+	let password = '';
+	
+	function handleLogin() {
+		alert('Attempting login for: ${username}');
+		// Need to connect to Backend
+	}
+</script>
+
+<div class="login-page">
+	<div class="login-card">
+
+		<img src="/logo.png" alt="Firegate Alpha Logo" class="logo" />
+				
+		<!-- Header -->
+		<div class="login-header">
+			<h1>Firegate Login</h1>
+			<p>Firegate Alpha, abiding by DTyF</p>
+		</div>
+		
+		<!-- Login Form -->
+		<form on:submit|preventDefault={handleLogin}>
+			<div class="form-group">
+				<label for="user">Username</label>
+				<input
+					id="user"
+					type="text"
+					bind:value={username}
+					placeholder="e.g. admin"
+					required
+				/>
+			</div>
+			
+			<div class="form-group">
+				<label for="pass">Password</label>
+				<input
+					id="pass"
+					type="password"
+					bind:value={password}
+					placeholder="********"
+					required
+				/>
+			</div>
+			
+			<button type="submit">Login</button>
+		</form>
+	</div>
+</div>	
+
+<style>
+	:global(html), :global(body) {
+		--bg-page: #000000;
+		--bg-card: #0a0a0a;
+		--bg-input: #121212;
+		--border-color: #262626;
+		--text-main: #ffffff;
+		--text-muted: #a3a3a3;
+		--accent: #ff6600;
+		--accent-hover: #cc5200;	
+	}				
+	
+	.login-page {
+		min-height: 100vh;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		background-color: var(--bg-page);
+		color: var(--text-main);
+		font-family: monospace;
+		padding: 1rem;
+	}
+	
+	.login-card {
+		background-color: var(--bg-card);
+		border: 1px solid var(--border-color);
+		padding: 2rem;
+		border-radius: 4px;
+		width: 100%;
+		max-width: 400px;
+	}
+	
+	.login-header {
+		text-align: center;
+		margin-bottom: 1.5rem;
+	}
+	
+	.login-header h1 {
+		font-size: 1.3rem;
+		font-weight: 700;
+		color: var(--accent);
+		margin: 0 0 0.5rem 0;
+	}
+
+	.login-header p {
+		font-size: 0.75rem;
+		color: var(--text-muted);
+		margin: 0;
+	}
+	
+	.error-banner {
+		background-color: #2a0808;
+		border: 1px solid #7f1d1d;
+		color: #f87171;
+		font-size: 0.8rem;
+		padding: 0.5rem;
+		margin-bottom: 1rem;
+		text-align: center;
+		border-radius: 2px;
+	}
+	
+	form {
+		display: flex;
+		flex-direction: column;
+		gap: 1rem;
+	}
+	
+	.form-group {
+		display: flex;
+		flex-direction: column;
+		gap: 0.375rem;
+	}
+	
+	.form-group label {
+		font-size: 0.75rem;
+		color: var(--text-muted);
+	}
+	
+	.form-group input {
+		background-color: var(--bg-input);
+		border: solid 1px var(--border-color);
+		color: var(--text-main);
+		border-radius: 2px;
+		font-size: 0.875rem;
+		padding: 0.625rem 0.75rem;
+	}
+	
+	.form-group input:focus {
+		outline: none;
+		border-color: var(--accent);
+	}
+	
+	button {
+		background-color: var(--accent);
+		color: #000000;
+		font-weight: 700;
+		font-size: 0.875rem;
+		padding: 0.625rem 1rem;
+		border: none;
+		border-radius: 2px;
+		cursor: pointer;
+		margin-top: 0.5rem;	
+	}
+	
+	button:hover {
+		background-color: var(--accent-hover);
+	}
+	
+	.logo {
+		width: 64px;
+		height: auto;
+		margin: 0 auto 1rem;
+		display: block;
+	}
+</style>
