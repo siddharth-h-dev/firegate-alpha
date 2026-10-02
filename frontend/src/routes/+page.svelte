@@ -1,10 +1,35 @@
 <script lang="ts">
 	let username = '';
 	let password = '';
+	let errorMessage = '';
 	
-	function handleLogin() {
-		alert('Attempting login for: ${username}');
-		// Need to connect to Backend
+	async function handleLogin() {
+		errorMessage =  '';
+		try {
+			const API_BASE = `http://${window.location.hostname}:8080`;
+			const response = await fetch(`${API_BASE}/api/login`, {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				credentials: 'include',
+				body: JSON.stringify({
+					username: username,
+					password: password
+				})
+			});
+			
+			if (!response.ok) {
+				throw new Error('Unauthorized or invalid JSON');
+			}
+			
+			const data = await response.json();
+			if (data.success) {
+				alert('Logged into Firegate Successfully.');
+				// Need to add Dashboard Route
+			}
+		} catch (err: any) {
+			errorMessage = err.message;
+			console.error(err);
+		}
 	}
 </script>
 
@@ -18,6 +43,13 @@
 			<h1>Firegate Login</h1>
 			<p>Firegate Alpha, abiding by DTyF</p>
 		</div>
+		
+		<!-- Error Banner -->
+		{#if errorMessage}
+			<div class="error-banner">
+				{errorMessage}
+			</div>
+		{/if}
 		
 		<!-- Login Form -->
 		<form on:submit|preventDefault={handleLogin}>
