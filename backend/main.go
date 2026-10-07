@@ -65,7 +65,8 @@ func main() {
 		if err := auth.Verify(req.Username, req.Password); err != nil {
 			http.Error(w, "Unauthorized", 401)
 			return
-		}	
+		}
+		sm.RenewToken(r.Context())	
 		sm.Put(r.Context(), "authenticated", true)
 		
 		w.Header().Set("Content-Type", "application/json")

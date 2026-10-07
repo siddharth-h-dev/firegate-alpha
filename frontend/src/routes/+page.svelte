@@ -36,13 +36,13 @@
 <div class="login-page">
 	<div class="login-card">
 
-		<img src="/logo.png" alt="Firegate Alpha Logo" class="logo" />
+		<img src="/assets/logo.png" alt="Firegate Alpha Logo" class="logo" />
 				
 		<!-- Header -->
 		<div class="login-header">
 			<h1>Firegate Login</h1>
 			<p>Firegate Alpha, abiding by DTyF</p>
-		</div>
+		</div>	
 		
 		<!-- Error Banner -->
 		{#if errorMessage}
@@ -78,7 +78,7 @@
 			<button type="submit">Login</button>
 		</form>
 	</div>
-</div>	
+</div>
 
 <style>
 	:global(html), :global(body) {
