@@ -29,7 +29,7 @@ const (
 	ServiceMOTD ServiceType = "motd"
 )
 
-func ApplyConfig(service ServiceType, msg string) error {
+func ApplyConfig(service ServiceType) error {
 	repoPath := git.GetRepoPath(string(service))
 	configFile := filepath.Join(repoPath, "environments", "default", getConfigFilename(service))
 	
@@ -42,9 +42,7 @@ func ApplyConfig(service ServiceType, msg string) error {
 	if err := apply(service, configFile); err != nil {
 		return fmt.Errorf("apply failed: %w", err)
 	}
-	
-	// Commit
-	return git.CommitChanges(string(service), msg)
+	return nil
 }
 
 func getConfigFilename(s ServiceType) string {

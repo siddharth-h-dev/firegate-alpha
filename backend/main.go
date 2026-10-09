@@ -66,7 +66,6 @@ func main() {
 			http.Error(w, "Unauthorized", 401)
 			return
 		}
-		sm.RenewToken(r.Context())	
 		sm.Put(r.Context(), "authenticated", true)
 		
 		w.Header().Set("Content-Type", "application/json")
@@ -92,6 +91,31 @@ func main() {
 			json.NewEncoder(w).Encode(map[string]string{"status": status})
 		})
 		
+		// Commit Changes to Git
+		
+		r.Post("/api/git/{repo}/commit", func(w http.ResponseWriter, r *http.Request) {
+			repo := chi.URLParam(r, "repo")
+			
+			var req ApplyRequest
+			if err := json.NewDecoder(r.Body).Decode(&req); err !=nil {
+				http.Error(w, "Invalid JSON Body", 400)
+				return
+			}
+			
+			if req.Message == "" {
+				req.Message = fmt.Sprintf("No Message - Commited via API")
+			}
+			
+			if err := git.CommitChanges(repo, req.Message); err != nil {
+				http.Error(w, err.Error(), 500)
+				return
+			}
+			
+			w.WriteHeader(http.StatusOK)
+			json.NewEncoder(w).Encode(map[string]string{"message": "commited succesfully to " + repo})
+			
+		})
+
 		// Restart a Service
 		
 		r.Get("/api/service/{service}/restart", func(w http.ResponseWriter, r *http.Request) {
@@ -119,18 +143,9 @@ func main() {
 		})		
 		// Apply changes
 		
-		r.Post("/api/service/{service}/apply", func(w http.ResponseWriter, r *http.Request) {
+		r.Get("/api/service/{service}/apply", func(w http.ResponseWriter, r *http.Request) {
 			svc := chi.URLParam(r, "service")
 			
-			var req ApplyRequest
-			if err := json.NewDecoder(r.Body).Decode(&req); err !=nil {
-				http.Error(w, "Invalid JSON Body", 400)
-				return
-			}
-			
-			if req.Message == "" {
-				req.Message = fmt.Sprintf("Updated %s config in UI", svc)
-			}
 			
 			var serviceType services.ServiceType
 			switch svc {
@@ -144,13 +159,13 @@ func main() {
 					return
 			}
 			
-			if  err := services.ApplyConfig(serviceType, req.Message); err != nil {
+			if  err := services.ApplyConfig(serviceType); err != nil {
 				http.Error(w, err.Error(), 500)
 				return
 			}
 			
 			w.WriteHeader(http.StatusOK)
-			json.NewEncoder(w).Encode(map[string]string{"message": svc + " config applied and commited"})
+			json.NewEncoder(w).Encode(map[string]string{"message": svc + " config applied "})
 		})
 	
 	})
