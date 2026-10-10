@@ -51,7 +51,7 @@ func main() {
 
 	// Login
 
-	r.Post("/api/login", func(w http.ResponseWriter, r *http.Request) {
+	r.Post("/api/auth/login", func(w http.ResponseWriter, r *http.Request) {
 		var req struct {
 			Username string `json:"username"`
 			Password string `json:"password"`

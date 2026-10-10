@@ -1,13 +1,15 @@
 <script lang="ts">
-	let username = '';
-	let password = '';
-	let errorMessage = '';
+	import { goto } from '$app/navigation';
+	
+	let username = $state('');
+	let password = $state('');
+	let errorMessage = $state('');
 	
 	async function handleLogin() {
 		errorMessage =  '';
 		try {
 			const API_BASE = `http://${window.location.hostname}:8080`;
-			const response = await fetch(`${API_BASE}/api/login`, {
+			const response = await fetch(`${API_BASE}/api/auth/login`, {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				credentials: 'include',
@@ -17,17 +19,23 @@
 				})
 			});
 			
-			if (!response.ok) {
-				throw new Error('Unauthorized or invalid JSON');
+			if (response.status === 401) {
+				errorMessage = "Invalid Username or Password. Please try again.";
+			} else if (!response.ok) {
+				alert(`Backend Error ${response.status}`);
+				throw new Error(`Backend Error ${response.status}`);
 			}
 			
-			const data = await response.json();
+			const data = await response.json(); 
 			if (data.success) {
-				alert('Logged into Firegate Successfully.');
-				// Need to add Dashboard Route
+				goto('/ui/core/dashboard');
 			}
 		} catch (err: any) {
-			errorMessage = err.message;
+			if (err instanceof TypeError && err.message.includes('fetch')) {
+				alert('CRITICAL: Could not connect to the Firegate backend. Wait for it to initialize or login into shell to fix the issue.');
+				console.error('CRITICAL: Could not connect to Backend.')
+				return;
+			}
 			console.error(err);
 		}
 	}
@@ -52,7 +60,7 @@
 		{/if}
 		
 		<!-- Login Form -->
-		<form on:submit|preventDefault={handleLogin}>
+		<form onsubmit={handleLogin}>
 			<div class="form-group">
 				<label for="user">Username</label>
 				<input
