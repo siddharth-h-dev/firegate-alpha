@@ -71,6 +71,22 @@ func main() {
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(map[string]bool{"success": true})
 	})
+
+	// Check for Authentication
+	
+	r.Get("/api/auth/session", func(w http.ResponseWriter, r *http.Request) {
+		isAuthenticated := sm.GetBool(r.Context(), "authenticated")
+
+		w.Header().Set("Content-Type", "application/json")
+		if isAuthenticated {
+			json.NewEncoder(w).Encode(map[string]bool{"authenticated": true})
+			return
+		}
+		
+		json.NewEncoder(w).Encode(map[string]bool{"authenticated": false})
+		
+
+	})
 	
 	r.Group(func(r chi.Router) {
 		

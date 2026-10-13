@@ -1,9 +1,45 @@
-<script>
+<script lang="ts">
+	import { goto } from '$app/navigation';
 	let openMenu = $state("");
 	
 	function toggleMenu(menuName) {
 		openMenu = openMenu == menuName ? "" : menuName;
 	}
+	
+	async function checkNredirect() {
+		try {
+			const API_BASE = `http://${window.location.hostname}:8080`;
+			const response = await fetch(`${API_BASE}/api/auth/session`, {
+				method: 'GET',
+				credentials: 'include'
+			});
+			
+			if (!response.ok) {
+				alert(`Backend Error: ${response.status} - Redirecting to Login page...`);
+				throw new Error(`Backend Error: ${response.status}`);
+				goto('/');
+				return;
+			}
+			
+			const data = await response.json();
+			if (!data.authenticated) {
+				goto('/');
+				return;
+			}
+		}  catch (err: any) {
+			if(err instanceof TypeError && err.message.includes('fetch')) {
+				alert('CRITICAL: Could not connect to the Firegate Backend. Redirecting to Login page...');
+				goto('/');
+				return;
+			}
+			alert(`An error (${err}) has occured during authentication. Redirectiong to Login page...`)
+			goto('/');
+		}
+	}
+	
+	$effect(() => {
+		checkNredirect();
+	})
 </script>
 
 <header class="header">

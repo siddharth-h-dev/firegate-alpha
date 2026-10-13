@@ -39,6 +39,42 @@
 			console.error(err);
 		}
 	}
+	
+	async function checkNredirect() {
+		errorMessage =  '';
+		try {
+			const API_BASE = `http://${window.location.hostname}:8080`;
+			const response = await fetch(`${API_BASE}/api/auth/session`, {
+				method: 'GET',
+				credentials: 'include'
+			});
+			
+			
+			if (!response.ok) {
+				alert(`Backend Error ${response.status}`);
+				throw new Error(`Backend Error ${response.status}`);
+			}
+			
+			const data = await response.json();
+			if (data.authenticated) {
+				goto('/ui/core/dashboard');
+				return;
+			}
+			 
+		} catch (err: any) {
+			if (err instanceof TypeError && err.message.includes('fetch')) {
+				alert('CRITICAL: Could not connect to the Firegate backend. Wait for it to initialize or login into shell to fix the issue.');
+				console.error('CRITICAL: Could not connect to Backend.')
+				return;
+			}
+			console.error(err);
+		}
+		
+	}
+	
+	$effect(() => {
+		checkNredirect();
+	});
 </script>
 
 <div class="login-page">
